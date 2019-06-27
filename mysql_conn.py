@@ -12,7 +12,7 @@ try:
         cursor = connection.cursor()
         cursor.execute("select database();")
         record = cursor.fetchone()
-        print("Your connected to - ", record)
+        print("You 're connected to - ", record)
 
 except Error as e:
     print ("Error while connecting to MySQL", e)
