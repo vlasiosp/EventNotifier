@@ -7,6 +7,8 @@ from selenium.webdriver.support import expected_conditions as EC
 
 options = Options()
 options.headless = False
+
+
 options.add_argument("--disable-infobars")
 options.add_argument("start-maximized")
 options.add_argument("--disable-extensions")
