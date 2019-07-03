@@ -24,16 +24,22 @@ browser = webdriver.Chrome(options=options, executable_path=r"E:\GitHub\EventNot
 
 
 def fb_login(email, passw):
-
     browser.get('https://www.facebook.com')
     browser.find_element_by_id("email").send_keys(email)
     browser.find_element_by_id("pass").send_keys(passw)
     browser.find_element_by_id('loginbutton').click()
 
+def fb_search(text):
+    browser.find_element_by_class_name('_1frb').send_keys(text)
+    browser.find_element_by_id('_585_').click()
 
 
 
 fb_login("teipir@gmail.com","19eptalofou76")
+
+def fb_search(text):
+    text="we are the chambions"
+
 
 
 
