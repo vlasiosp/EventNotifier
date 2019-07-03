@@ -52,3 +52,4 @@ except TimeoutException:
 
 # the page is ajaxy so the title is originally this:
 display.stop()
+browser.close()
