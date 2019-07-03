@@ -31,14 +31,13 @@ def fb_login(email, passw):
 
 def fb_search(text):
     browser.find_element_by_class_name('_1frb').send_keys(text)
-    browser.find_element_by_id('_585_').click()
-
+    browser.find_element_by_css_selector("button[data-testid='facebar_search_button']").click()
 
 
 fb_login("teipir@gmail.com","19eptalofou76")
 
-def fb_search(text):
-    text="we are the chambions"
+fb_search("Champions")
+
 
 
 
