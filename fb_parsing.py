@@ -7,7 +7,7 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 import random
 
-
+'''----------------------Options----------------------'''
 options = Options()
 options.headless = False
 options.add_argument("--disable-infobars")
@@ -20,18 +20,27 @@ options.add_experimental_option("prefs", {
 })
 
 
+'''----------------------Browser Definition----------------------'''
+
 browser = webdriver.Chrome(options=options, executable_path=r'webdrivers/chromedriver.exe')
 
 
+'''----------------------Browsing----------------------'''
+
 functions.fb_login(browser, 'teipir@gmail.com', '19eptalofou76')
 functions.fb_search(browser, 'Champions')
+display.stop()
 
+
+'''----------------------Error Handling----------------------'''
 
 try:
-    element = WebDriverWait(browser, random.randrange(1,4,1)).until(EC.presence_of_element_located((By.ID, 'facebook')))
+    element = WebDriverWait(browser, random.randrange(1, 4, 1)).until(EC.presence_of_element_located((By.ID, 'facebook')))
 
 except TimeoutException:
     print("Time out!")
 
-display.stop()
+
+'''----------------------Closing Browser----------------------'''
+
 browser.close()
