@@ -2,9 +2,9 @@ import mysql.connector
 from mysql.connector import Error
 try:
     connection = mysql.connector.connect(host='remotemysql.com',
-                                        database='jzwFzO93ot',
-                                        user='jzwFzO93ot',
-                                        password='rcIq0pae03')
+                                        database='La8hSojJ1H',
+                                        user='La8hSojJ1H',
+                                        password='6oODmgbNYi')
     if connection.is_connected():
         db_Info = connection.get_server_info()
         print("Connected to MySQL database... MySQL Server version on ", db_Info)
