@@ -1,7 +1,7 @@
 import keys_urls
 import tweepy
 
-
+# ---Functions ---
 def user_api():
     user = api.get_user('KostasVaxevanis')
     print(user.screen_name)
@@ -10,6 +10,12 @@ def user_api():
     for friend in user.friends():
         print(friend.screen_name)
 
+
+def search_hashtag():
+    for tweet in tweepy.Cursor(api.search, q="#Chania", count=100,
+                               lang="en",
+                               since="2017-04-03").items():
+        print(tweet.created_at, tweet.text)
 
 auth = tweepy.OAuthHandler(keys_urls.ck, keys_urls.cs)
 auth.set_access_token(keys_urls.at, keys_urls.ats)
