@@ -2,6 +2,9 @@ import tweepy
 from tweepy import Stream
 from tweepy.streaming import StreamListener
 from authenticator import authentication
+from mysql_conn import connect
+from mysql_conn import Error
+from dateutil import parser
 import json
 
 
@@ -15,10 +18,35 @@ class OutListener(StreamListener):
         Name = status.user.screen_name
         print(Name)
 
+    def on_data(self, data):
+
+        try:
+            raw_data = json.loads(data)
+
+            if 'text' in raw_data:
+
+                user_id = raw_data['user']['id']
+                tweet = raw_data['text']
+                username = raw_data['user']['screen_name']
+
+                if raw_data['place'] is not None:
+                    place = raw_data['place']['country']
+                    print(place)
+                else:
+                    place = None
+
+                location = raw_data['user']['location']
+
+                # insert data just collected into MySQL database
+                connect(user_id, username, tweet, place, location)
+                #print("Tweet colleted at: {} ".format(str(created_at)))
+        except Error as e:
+            print(e)
 
 
 
-# Connect to DB
+
+
 
 if __name__ == "__main__":
     # Get access and key from another class
@@ -47,6 +75,6 @@ if __name__ == "__main__":
 
     stream.filter(locations=[23.42, 34.61, 24.38, 35.76], is_async=True)
 
-# Find relevant hashtag users
+connect('user_id', 'username', 'tweet', 'place', 'location')
 
 
