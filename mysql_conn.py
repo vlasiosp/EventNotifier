@@ -1,24 +1,39 @@
 import mysql.connector
 from mysql.connector import Error
-try:
-    connection = mysql.connector.connect(host='remotemysql.com',
-                                        database='La8hSojJ1H',
-                                        user='La8hSojJ1H',
-                                        password='6oODmgbNYi')
-    if connection.is_connected():
-        db_Info = connection.get_server_info()
-        print("Connected to MySQL database... MySQL Server version on ", db_Info)
 
-        cursor = connection.cursor()
-        cursor.execute("select database();")
-        record = cursor.fetchone()
-        print("You 're connected to - ", record)
+def connect(user_id, username, tweet, place, location):
+    """
+    connect to MySQL database and insert twitter data
+    """
+    try:
+        con = mysql.connector.connect(host='remotemysql.com',
+                                             database='zAgvpr43LA',
+                                             user='zAgvpr43LA',
+                                             password='vTrPIIHov2')
 
-except Error as e:
-    print ("Error while connecting to MySQL", e)
-finally:
-        #closing database connection.
-    if(connection.is_connected()):
-        cursor.close()
-        connection.close()
-        print("MySQL connection is closed")
+        if con.is_connected():
+            """
+            Insert twitter data
+            """
+            cursor = con.cursor()
+            # twitter, golf
+            cr_t= """CREATE TABLE IF NOT EXISTS USER_ACTIVITY(
+    UserId VARCHAR(255),
+    ScreenName VARCHAR(255),
+    TweetText VARCHAR(255),
+    Place VARCHAR(255),
+    Location VARCHAR(255)
+    )"""
+            cursor.execute(cr_t)
+            query = "INSERT INTO USER_ACTIVITY (UserId, ScreenName, TweetText, Place, Location) VALUES (%s, %s, %s, %s, %s)"
+            cursor.execute(query, (user_id, username, tweet, place, location))
+            con.commit()
+
+
+    except Error as e:
+        print(e)
+
+    cursor.close()
+    con.close()
+    print("MySQL connection is closed")
+    return
