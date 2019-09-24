@@ -2,13 +2,65 @@ import tweepy
 from tweepy import Stream
 from tweepy.streaming import StreamListener
 from authenticator import authentication
-from mysql_conn import connect
-from mysql_conn import Error
-from dateutil import parser
+from mysql_conn import db_connect
+import MySQLdb
 import json
+from urllib3.exceptions import ProtocolError
+from dateutil import parser
 
 
-chania_loc = [23.42, 34.61, 24.38, 35.76]
+chania_loc = [21.236572,34.703235,25.317993,36.361587]
+
+cr_t_activity = """CREATE TABLE IF NOT EXISTS USER_ACTIVITY(
+                            Created_at VARCHAR (255),
+                            UserId VARCHAR(255),
+                            ScreenName VARCHAR(255),
+                            TweetText VARCHAR(255),
+                            Place VARCHAR(255),
+                            Location VARCHAR(255) ,
+                            PRIMARY KEY (UserId) 
+                                )"""
+
+def store_db(created_at,user_id, screen_name, tweet, place, location):
+    """
+    connect to MySQL database and insert twitter data
+    """
+
+    try:
+        con = db_connect()
+        con.set_character_set('utf8')
+
+
+        cursor = con.cursor()
+
+        cursor.execute('SET NAMES utf8;')
+        cursor.execute('SET CHARACTER SET utf8;')
+        cursor.execute('SET character_set_connection=utf8;')
+
+        if con:
+            print("Connection successful")
+
+
+            #Insert twitter data
+
+
+            cursor.execute(cr_t_activity)
+            query = "INSERT INTO USER_ACTIVITY (Created_at, UserId, ScreenName, TweetText, Place, Location) VALUES (%s, %s, %s, %s, %s, %s)"
+
+            cursor.execute(query, (created_at, user_id, screen_name, tweet, place, location))
+        else:
+            print('connection unsaccesful')
+
+        con.commit()
+        cursor.close()
+        con.close()
+        print("MySQL connection is closed")
+        return
+
+    except MySQLdb.Error as e:
+        print(e)
+
+
 
 
 class OutListener(StreamListener):
@@ -18,34 +70,42 @@ class OutListener(StreamListener):
         Name = status.user.screen_name
         print(Name)
 
+
     def on_data(self, data):
 
         try:
-            raw_data = json.loads(data)
+            rawdata = json.loads(data)
 
-            if 'text' in raw_data:
+            # grab the wanted data from the Tweet
 
-                user_id = raw_data['user']['id']
-                tweet = raw_data['text']
-                username = raw_data['user']['screen_name']
+            user_id = rawdata['user']['id']
+            screen_name = rawdata['user']['screen_name']
+            text = rawdata['text']
+            #text_id = rawdata['id']
+            created_at = parser.parse(rawdata['created_at'])
+            location = rawdata['user']['location']
 
-                if raw_data['place'] is not None:
-                    place = raw_data['place']['country']
-                    print(place)
-                else:
-                    place = None
+            if rawdata['place'] is not None:
 
-                location = raw_data['user']['location']
+                place = rawdata['place']['country']
 
-                # insert data just collected into MySQL database
-                connect(user_id, username, tweet, place, location)
-                #print("Tweet colleted at: {} ".format(str(created_at)))
-        except Error as e:
+            else:
+                place = None
+
+            # print out a message to the screen that we have collected a tweet
+            print("Tweet collected at " + str(created_at))
+            print(created_at, user_id, screen_name, text, place, location)
+
+            # insert the data into the MySQL database
+            store_db(created_at, user_id, screen_name, text,  place, location)
+
+
+        except MySQLdb.Error as e:
             print(e)
 
-
-
-
+    def on_exception(self, exception):
+        print(exception)
+        return
 
 
 if __name__ == "__main__":
@@ -54,10 +114,8 @@ if __name__ == "__main__":
 
 # Authentication
     cred = authentication()
-
     consumer_key = cred.getconsumer_key()
     consumer_secret = cred.getconsumer_secret()
-
     access_token = cred.getaccess_token()
     access_token_secret = cred.getaccess_token_secret()
 
@@ -65,16 +123,19 @@ if __name__ == "__main__":
     auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
     auth.secure = True
     auth.set_access_token(access_token, access_token_secret)
-
     api = tweepy.API(auth)
 
     # Start streaming
 
     myListener = OutListener()
-    stream = Stream(auth=api.auth, listener=myListener)
-
-    stream.filter(locations=[23.42, 34.61, 24.38, 35.76], is_async=True)
-
-connect('user_id', 'username', 'tweet', 'place', 'location')
+    stream = Stream(auth=api.auth, listener=myListener )
 
 
+    while True:
+        try:
+            stream.filter(locations=chania_loc, is_async=True)
+
+        except:
+            # Bypass some errors related to urllib3 requests
+            (ProtocolError)
+            continue
