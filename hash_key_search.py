@@ -4,6 +4,7 @@ from tweepy import *
 from authenticator import authentication
 from mysql_conn import db_connect
 
+
 # Create table of user's tweets
 cr_t_hash = """CREATE TABLE IF NOT EXISTS USER_HASHTAG_SEARCH(
                           UserId VARCHAR(255),
