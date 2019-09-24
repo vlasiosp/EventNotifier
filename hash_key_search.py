@@ -1,73 +1,86 @@
-import time
+import MySQLdb
 import tweepy
+from tweepy import *
 from authenticator import authentication
-import json
+from mysql_conn import db_connect
+
+# Create table of user's tweets
+cr_t_hash = """CREATE TABLE IF NOT EXISTS USER_HASHTAG_SEARCH(
+                          UserId VARCHAR(255),
+                          UserName VARCHAR(255),
+                          ScreenName VARCHAR(255),
+                          TweetText VARCHAR(255),
+                          UserLocation VARCHAR(255),
+                          PRIMARY KEY (UserId)
+                          )"""
+
+
+def search_hashtag(listOfTweets, keyword, numOfTweets):
+
+    for keyword in tweepy.Cursor(api.search, q=keyword).items(numOfTweets):
+
+
+        try:
+            con = db_connect()
+            con.set_character_set('utf8')
+            cursr = con.cursor()
+            cursr.execute(cr_t)
+
+            if con:
+                diction = {'UserId': keyword.user.id,
+                           'UserName': keyword.user.name,
+                           'ScreenName': keyword.user.screen_name,
+                           'TweetText': keyword.text,
+                           'UserLocation': keyword.user.location,
+                           }
+
+                userid = diction['UserId']
+                username = diction['UserName']
+                screen_name = diction['ScreenName']
+                tweet_text = diction['TweetText']
+                location = diction['UserLocation']
+
+                query = "INSERT INTO USER_HASHTAG_SEARCH (UserId, UserName, ScreenName, TweetText, UserLocation) VALUES (%s, %s, %s, %s, %s)"
+
+                cursr.execute(query, (userid, username, screen_name, tweet_text, location))
+                listOfTweets.append(diction)
+                print(listOfTweets)
+                print(len(listOfTweets))
+                con.commit()
+                cursr.close()
+                con.close()
+                print("MySQL connection is closed")
+
+            else:
+                print('connection unsaccesful')
 
 
 
-def search_hashtag(listOfTweets, keywords, numOfTweets):
-    # Iterate through all tweets containing the given word, api search mode
-    for key in keywords:
-        for tweet in tweepy.Cursor(api.search, q=key).items(numOfTweets):
-            # Add tweets in this format
-            dict_ = {'Screen Name': tweet.user.screen_name,
-                     'User Name': tweet.user.name,
 
-                     }
-            '''Tweet Created At': tweet.created_at,
-                    'Tweet Text': tweet.text,
-                    'User Location': tweet.user.location,
-                    'Tweet Coordinates': tweet.coordinates,
-                    'Retweet Count': tweet.retweet_count,
-                    'Retweeted': tweet.retweeted,
-                    'Phone Type': tweet.source,
-                    'Favorite Count': tweet.favorite_count,
-                    'Favorited': tweet.favorited,
-                    'Replied': tweet.in_reply_to_status_id_str
-                     # Να μην ξεχάσω αν έχει λάθη μήπως σχετίζεται με το unicode'''
 
-            listOfTweets.append(dict_)
-    print(listOfTweets)
-    print(len(listOfTweets))
-    titiv = listOfTweets
 
+
+
+        except MySQLdb.Error as e:
+            print(e)
 
 
 if __name__ == "__main__":
-
-    hashtags = ['#Chania', '#ChaniaPost']
     # Authentication
-    cred = authentication()
 
+    cred = authentication()
     consumer_key = cred.getconsumer_key()
     consumer_secret = cred.getconsumer_secret()
-
     access_token = cred.getaccess_token()
     access_token_secret = cred.getaccess_token_secret()
 
     auth = tweepy.AppAuthHandler(consumer_key, consumer_secret)
     auth.secure = True
-    #auth.set_access_token(access_token, access_token_secret)
+
+    # For user API: auth.set_access_token(access_token, access_token_secret)
 
     api = tweepy.API(auth, wait_on_rate_limit=True,
                      wait_on_rate_limit_notify=True)
 
-    # search_hashtag(listOfTweets=[], keywords=hashtags, numOfTweets=1000)
-    names = ["#ChaniaPost", "#Chania"]
-    for name in names:
-        followers = tweepy.Cursor(api.followers_ids, screen_name=name).items()
-
-        while True:
-            with open('tweets.json', 'w', encoding='utf8') as file:
-                try:
-                    follower = next(followers)
-                except tweepy.TweepError:
-                    time.sleep(60 * 15)
-                    follower = next(followers)
-                except StopIteration:
-                    break
-
-                print(follower)
-
-                file.write(str(follower))
-
+    preferred_hashtags = ["#Chania", "xania", "chania"]
+    search_hashtag(listOfTweets=[], keyword=preferred_hashtags, numOfTweets=500)
