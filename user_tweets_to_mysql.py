@@ -75,7 +75,7 @@ def get_all_tweets(screen_name):
 
         print("...%s tweets downloaded so far" % (len(alltweets)))
 
-
+        try:
         for tweet in alltweets:
             con = db_connect()
             curs = con.cursor()
