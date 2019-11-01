@@ -52,7 +52,7 @@ def get_all_tweets(screen_name):
     alltweets = []
 
     # make initial request for most recent tweets (200 is the maximum allowed count)
-    new_tweets = api.user_timeline(screen_name=screen_name, count=3240)
+    new_tweets = api.user_timeline(screen_name=screen_name, count=200)
 
     # save most recent tweets
     alltweets.extend(new_tweets)
@@ -65,7 +65,7 @@ def get_all_tweets(screen_name):
         print ("getting tweets before %s" % (oldest))
 
         # all subsiquent requests use the max_id param to prevent duplicates
-        new_tweets = api.user_timeline(screen_name=screen_name, count=3240, max_id=oldest)
+        new_tweets = api.user_timeline(screen_name=screen_name, count=200, tweet_mode="extended", max_id=oldest)
 
         # save most recent tweets
         alltweets.extend(new_tweets)
@@ -76,15 +76,18 @@ def get_all_tweets(screen_name):
         print("...%s tweets downloaded so far" % (len(alltweets)))
 
         try:
-        for tweet in alltweets:
-            con = db_connect()
-            curs = con.cursor()
-            curs.execute('SET NAMES utf8mb4;')
-            curs.execute('SET CHARACTER SET utf8mb4;')
-            curs.execute('SET character_set_connection=utf8mb4')
-            query = 'INSERT INTO TWEETS (ScreenName, TweetId, Created_at, TweetText) Values (%s, %s, %s, %s)'
-            curs.execute(query, (screen_name, tweet.id_str, tweet.created_at, tweet.text))
-            con.commit()
+            for tweet in alltweets:
+                con = db_connect()
+                curs = con.cursor()
+                curs.execute('SET NAMES utf8mb4;')
+                curs.execute('SET CHARACTER SET utf8mb4;')
+                curs.execute('SET character_set_connection=utf8mb4')
+                query = 'INSERT INTO TWEETS (ScreenName, TweetId, Created_at, TweetText) Values (%s, %s, %s, %s)'
+                curs.execute(query, (screen_name, tweet.id_str, tweet.created_at, tweet.text))
+                con.commit()
+
+        except MySQLdb.Error as e:
+            print(e)
 
 
 
@@ -106,6 +109,7 @@ if __name__ == '__main__':
     print(screen_names)
     for screen_name in screen_names:
         get_all_tweets(screen_name)
+        print(get_all_tweets(screen_name))
 
         #print(screen_name)
 
