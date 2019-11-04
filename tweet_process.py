@@ -20,11 +20,13 @@ def word_split():
     cursor.execute(user_select_query)
     user_select = cursor.fetchall()
 
-# make a list and remove some special characters
+    # make a list and remove some special characters
     user_select = list(sum(user_select, ()))
+    user_select = str(user_select)
 
+    # split words by comma
 
-
+    allusers = user_select.split(",")
 
 
 
