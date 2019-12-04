@@ -1,6 +1,6 @@
-""" Python Program using tweepy. Mysql and twitter API modiles. Credits belong to
-Github user Yanofsky that wrote the initial code https://gist.github.com/yanofsky/5436496.
-My contribution is the population of tweets in mysql instead of a csv file.
+""" Python Program using tweepy. Mysql and twitter API modules. Based on code created by
+Github user Yanofsky who created this program https://gist.github.com/yanofsky/5436496.
+I Altered the code so that results are saved into a mysql db instead of a csv file.
 
 What this code does: Selects each user from a user table, finds user's latest tweets and insert them fulltext to a
 "Tweets" table for further processing"""
@@ -98,18 +98,20 @@ if __name__ == '__main__':
     curs.execute('SET NAMES utf8;')
     curs.execute('SET CHARACTER SET utf8;')
     curs.execute('SET character_set_connection=utf8;')
-    user_row = "SELECT ScreenName FROM USERS"
+    user_row = "SELECT ScreenName, UserId FROM USERS"
     curs.execute(user_row)
     screen_names = curs.fetchall()
-    screen_names = [i[0] for i in screen_names]
-    print(screen_names, len(screen_names))
+    print(screen_names)
+    screen_name_list = [i[0] for i in screen_names]
+    user_id = [j[1] for j in screen_names]
+    print(screen_names, user_id, len(screen_names))
 
     try:
-        for screen_name in screen_names:
+        for screen_name,user_id in screen_names:
             get_all_tweets(screen_name)
             count += 1
             print(count, " user's tweets processed")
-            print(screen_name)
+            print(screen_name, user_id)
     except tweepy.TweepError as er:
         if er:
             print(er)
