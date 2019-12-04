@@ -1,6 +1,6 @@
 """ Python Program using tweepy. Mysql and twitter API modules. Based on code created by
 Github user Yanofsky who created this program https://gist.github.com/yanofsky/5436496.
-I Altered the code so that results are saved into a mysql db instead of a csv file.
+I altered the code so that results are saved into a mysql db instead of a csv file.
 
 What this code does: Selects each user from a user table, finds user's latest tweets and insert them fulltext to a
 "Tweets" table for further processing"""
