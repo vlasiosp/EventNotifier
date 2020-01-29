@@ -39,7 +39,12 @@ def tweet_process(tweet):
     # remove dots
     tweet = re.sub(r'\.+', "", tweet)
 
-    #filtered_url = re.sub(r'http\S+',"", tweet)
+# Make a list of positive adjectives to compare with the text
+    with open('positive_adj.py') as pos_adj_file:
+        pos_adj = pos_adj_file.read().split(',')
+    print(pos_adj)
+
+
     word_tok = tTok.tokenize(tweet)
 
     stop_words_en = set(stopwords.words("english"))
