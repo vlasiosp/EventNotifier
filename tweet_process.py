@@ -18,9 +18,25 @@ translator =  Translator()
 
 # We will use 2 languages , so we initialize 2 lists for Greek and English tweets to store the filtered tweets
 t_clean_en = []
-t_clean_gr = []
+
 
 tTok = TweetTokenizer()
+
+# Make a list of positive adjectives and adverbs to compare with the text
+with open('positive_adj.py') as pos_adj_file:
+    pos_adj = pos_adj_file.read().split(',')
+    pos_adj_file.close()
+    #print(pos_adj)
+
+with open('positive_adv.py') as pos_adv_file:
+    pos_adv = pos_adv_file.read().splitlines()
+    pos_adv_file.close()
+    #print(pos_adv)
+
+positives = sorted(pos_adj + pos_adv)
+print(positives)
+
+
 
 # This is the most important function for tweet processing
 def tweet_process(tweet):
@@ -39,19 +55,9 @@ def tweet_process(tweet):
     # remove dots
     tweet = re.sub(r'\.+', "", tweet)
 
-# Make a list of positive adjectives to compare with the text
-    with open('positive_adj.py') as pos_adj_file:
-        pos_adj = pos_adj_file.read().split(',')
-    print(pos_adj)
 
-# Make a list of positive adjectives and adverbs to compare with the text
-    with open('positive_adj.py') as pos_adj_file:
-        pos_adj = pos_adj_file.read().split(',')
-    print(pos_adj)
 
-    with open('positive_adv.py') as pos_adv_file:
-        pos_adv = pos_adv_file.read().splitlines()
-    print(pos_adv)
+
 
 
     word_tok = tTok.tokenize(tweet)
@@ -64,9 +70,12 @@ def tweet_process(tweet):
 # We use language detection module to determine the language and store the tweets accordingly
     try:
         if langdetect.detect(tweet) == "en":
-            for w in word_tok:
-                if w not in stop_words_en and w not in string.punctuation and (w in pos_adj or w in pos_adv) :
-                    t_clean_en.append(w)
+            for pos_w in positives:
+                if pos_w in word_tok:
+                    for w in word_tok:
+                        if w not in stop_words_en and w not in string.punctuation:
+                            t_clean_en.append(w)
+
             #print(tweet)
             print("English",t_clean_en)
 
