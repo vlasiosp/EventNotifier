@@ -65,7 +65,7 @@ def tweet_process(tweet):
     try:
         if langdetect.detect(tweet) == "en":
             for w in word_tok:
-                if w not in stop_words_en and w not in string.punctuation and (w in pos_adj or w in pos_adv):
+                if w not in stop_words_en and w not in string.punctuation and (w in pos_adj or w in pos_adv) :
                     t_clean_en.append(w)
             #print(tweet)
             print("English",t_clean_en)
