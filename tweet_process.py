@@ -44,11 +44,20 @@ def tweet_process(tweet):
         pos_adj = pos_adj_file.read().split(',')
     print(pos_adj)
 
+# Make a list of positive adjectives and adverbs to compare with the text
+    with open('positive_adj.py') as pos_adj_file:
+        pos_adj = pos_adj_file.read().split(',')
+    print(pos_adj)
+
+    with open('positive_adv.py') as pos_adv_file:
+        pos_adv = pos_adv_file.read().splitlines()
+    print(pos_adv)
+
 
     word_tok = tTok.tokenize(tweet)
 
     stop_words_en = set(stopwords.words("english"))
-    stop_words_gr = set(stopwords.words("greek"))
+
 
 
 
@@ -56,16 +65,11 @@ def tweet_process(tweet):
     try:
         if langdetect.detect(tweet) == "en":
             for w in word_tok:
-                if w not in stop_words_en and w not in string.punctuation:
+                if w not in stop_words_en and w not in string.punctuation and (w in pos_adj or w in pos_adv):
                     t_clean_en.append(w)
             #print(tweet)
             print("English",t_clean_en)
 
-        elif langdetect.detect(tweet) == "el":
-            for w in word_tok:
-                if w not in stop_words_gr and w not in string.punctuation:
-                    t_clean_gr.append(w)
-            print("Greek",t_clean_gr)
         else:
             pass
     except:
