@@ -6,7 +6,7 @@ tweet and make a user profile according to preferences
 
 from googletrans import Translator
 from nltk.corpus import stopwords
-from nltk import word_tokenize, wordpunct_tokenize, sent_tokenize, casual_tokenize
+from nltk import pos_tag
 from nltk.tokenize.casual import TweetTokenizer
 from mysql_conn import db_connect
 import langdetect
@@ -34,7 +34,7 @@ with open('positive_adv.py') as pos_adv_file:
     #print(pos_adv)
 
 positives = sorted(pos_adj + pos_adv)
-print(positives)
+#print(positives)
 
 
 
@@ -47,20 +47,23 @@ def tweet_process(tweet):
     tweet = re.sub(r'https?:\/\/.*[\r\n]*', '', tweet)
     #remove retweets
     tweet = re.sub(r'^RT[\s]+', '', tweet)
-    #remove mentrions and # from hashtags
-    tweet = re.sub(r'[#@*]', '', tweet)
-    tweet = re.sub(r'\$\w*', '', tweet)
+    #remove mentions
+    tweet = re.sub('@[^\s]+','',tweet)
+    # remove punctuation
+    tweet = re.sub('@[^\w\s]','', tweet)
+    # remove # from hashtags and $ from
+    tweet = re.sub(r'\#\w*', '', tweet)
     #remove numbers
     tweet = re.sub(r'\d', '', tweet)
     # remove dots
     tweet = re.sub(r'\.+', "", tweet)
 
-
-
-
-
-
     word_tok = tTok.tokenize(tweet)
+
+    tags = pos_tag(word_tok)
+    #print(tags)
+    pos_all = [word for word,pos in tags if (pos.startswith('NN') or pos.startswith('RB') or pos.startswith('JJ'))]
+    #print(pos_all)
 
     stop_words_en = set(stopwords.words("english"))
 
@@ -70,14 +73,20 @@ def tweet_process(tweet):
 # We use language detection module to determine the language and store the tweets accordingly
     try:
         if langdetect.detect(tweet) == "en":
-            for pos_w in positives:
-                if pos_w in word_tok:
-                    for w in word_tok:
+            # All selected pos tags (Nouns, adjectives and adverbs)
+            for pos_w in pos_all:
+                # Select all the twets where there are adj, adv with positive meaning
+                if pos_w in positives:
+                    # Select only nouns form the positive text
+                    pos_noun = [pos_w for pos_w,pos in tags if (pos.startswith('NN'))]
+                    for w in pos_noun:
                         if w not in stop_words_en and w not in string.punctuation:
                             t_clean_en.append(w)
 
+
+            #print("English",t_clean_en)
             #print(tweet)
-            print("English",t_clean_en)
+            return(t_clean_en)
 
         else:
             pass
@@ -94,12 +103,12 @@ def tweet_selector():
     user_select_query = "SELECT ScreenName from USERS"
     cursor.execute(user_select_query)
     user_select = cursor.fetchall()
-    print(user_select)
+    #print(user_select)
     tw_list = []
 
 # make a list and remove some special characters
     user_select = list(sum(user_select, ()))
-    print(user_select)
+    #print(user_select)
 
     for user in user_select:
 
@@ -109,24 +118,28 @@ def tweet_selector():
         # fetching user tweets and saving it to a list
         fetchall_usertweets = cursor.fetchall()
         fetchall_usertweets = list(sum(fetchall_usertweets, ()))
+
+        # setting up a counter which counts the tweets of each user
         counter = 0
 
         #examine each user's tweet separately
 
         for tweet in fetchall_usertweets:
-
-    # bring tokenized tweets
-            tw_pr = tweet_process(tweet)
-    # setting up a counter which counts the tweets of each user
-            counter+=1
-    # If we reach the last tweet of the user, reset counter
+            print(tweet)
+            counter += 1
+            #Reset counter when we process all user's tweets
             if counter ==fetchall_usertweets[-1]:
                 counter=0
+    # bring tokenized tweets
+            tw_pr = tweet_process(tweet)
+
+
+    # If we reach the last tweet of the user, reset counter
+
             print(tw_pr, counter)
 
-            #print ("\n",tw_pr)
-    # making a list of tokenized tweets
-            #print(tw_list)
+
+
 
 
 if __name__ == '__main__':
