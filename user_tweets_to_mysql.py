@@ -82,7 +82,7 @@ def get_all_tweets(screen_name):
                 curs.execute('SET NAMES utf8mb4;')
                 curs.execute('SET CHARACTER SET utf8mb4;')
                 curs.execute('SET character_set_connection=utf8mb4')
-                query = 'INSERT IGNORE INTO TWEETS (ScreenName, TweetId, Created_at, TweetText) Values (%s, %s, %s, %s)'
+                query = 'INSERT IGNORE INTO TWEETS (ScreenName, tweet_id, Created_at, TweetText) Values (%s, %s, %s, %s)'
                 curs.execute(query, (screen_name, tweet.id_str, tweet.created_at, tweet.full_text))
                 con.commit()
 
