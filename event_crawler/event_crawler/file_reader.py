@@ -1,10 +1,11 @@
 my_file = open("E:\GitHub\EventNotifier\categories.txt", "r")
 content = my_file.read()
-print(content)
-
 content_list = content.splitlines()
-for cat in content_list:
-    cat_file =open("E:\GitHub\EventNotifier\{}.txt".format(cat))
-    cat_list = cat_file.read()
-    print(cat_list)
+cat_file =open("E:\GitHub\EventNotifier\{}.txt".format(content_list[0]), "r")
+category=cat_file.read()
+cat_list = category.splitlines()
+print(cat_list)
+cat_file.close()
 my_file.close()
+
+
